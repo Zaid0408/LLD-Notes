@@ -77,21 +77,63 @@ class SportsCar {
 public class Encapsulation {
     public static void main(String[] args) {
 
-        SportsCar mySportsCar = new SportsCar("Ford", "Mustang");
+        // SportsCar mySportsCar = new SportsCar("Ford", "Mustang");
 
-        mySportsCar.startEngine();
-        mySportsCar.shiftGear(1);
-        mySportsCar.accelerate();
-        mySportsCar.shiftGear(2);
-        mySportsCar.accelerate();
-        mySportsCar.brake();
-        mySportsCar.stopEngine();
+        // mySportsCar.startEngine();
+        // mySportsCar.shiftGear(1);
+        // mySportsCar.accelerate();
+        // mySportsCar.shiftGear(2);
+        // mySportsCar.accelerate();
+        // mySportsCar.brake();
+        // mySportsCar.stopEngine();
 
         //Setting arbitrary value to speed.
         //mySportsCar.currentSpeed = 500;
 
        // System.out.println("Current Speed of My Sports Car is set to " + mySportsCar.currentSpeed);
 
-       System.out.println("Current Speed of My Sports Car is " + mySportsCar.getSpeed());
+       // System.out.println("Current Speed of My Sports Car is " + mySportsCar.getSpeed());
+
+       MyAccount myAccount = new MyAccount(1000);
+       myAccount.deposit(500);
+       myAccount.withdraw(200);
+
+       System.out.println("Current Balance of My Account is " + myAccount.getBalance());
     }
 } 
+
+class MyAccount{
+    private long balance;
+
+
+    public MyAccount(long balance){
+        this.balance = balance;
+    }
+
+    public void setBalance(long balance){
+        this.balance = balance;
+    }
+
+    public long getBalance(){
+        return balance;
+    }
+    public void deposit(long amount){
+        balance += amount;
+        System.out.println("Deposited: " + amount + " in Current Account. New Balance: " + balance);
+    }
+
+    public long withdraw(long amount)
+    {
+        if(balance >= amount)
+        {
+            balance -= amount;
+            System.out.println("Withdrawn: " + amount + " from Current Account. New Balance: " + balance);
+        }
+        else
+        {
+            System.out.println("Insufficient funds in Current Account!");
+            return -1;
+        }
+        return balance;
+    }
+}

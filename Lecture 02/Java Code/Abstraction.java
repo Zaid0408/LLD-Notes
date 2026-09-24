@@ -21,6 +21,11 @@ interface Car {
 }
 
 /*
+To summarize, use a class when you want to define a specific type of object, 
+and use an interface when you want to define a common behavior that can be shared by multiple classes.
+*/
+
+/*
 This is a Concrete class (A class that provide implementation details of an interface/abstract class).
 Now anyone can make an Object of 'SportsCar' and can assign it to 'Car' reference. 
 (See main method for this)
