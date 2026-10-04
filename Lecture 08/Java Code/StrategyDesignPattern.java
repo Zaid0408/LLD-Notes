@@ -1,3 +1,8 @@
+/*
+WalkableRobot, TalkableRobot, FlyableRobot are strategy interfaces for walk, talk, and fly
+We can implement these interfcaes by using diff startegies ex NormalWalk, NormalTalk, NormalFly etc
+*/
+
 // --- Strategy Interface for Walk ---
 interface WalkableRobot {
     void walk();
