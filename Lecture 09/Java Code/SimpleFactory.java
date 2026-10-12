@@ -53,5 +53,87 @@ public class SimpleFactory {
         if (burger != null) {
             burger.prepare();
         }
+
+        String type="email";
+        NotificationFactory notificationFactory=new NotificationFactory();
+        Notification notification=notificationFactory.getNotification(type);
+        notification.sendNotification("Hello");
+
+        type="push";
+        notification=notificationFactory.getNotification(type);
+        notification.sendNotification("Hello");
+    }
+}
+
+// Practice Problem 
+
+/*
+
+Notification System Build a notification system supporting:
+
+Email
+
+SMS
+
+Push Notification
+
+Requirements:
+
+Create a Notification interface.
+Implement the three notification types.
+Create a NotificationFactory that accepts a notification type and returns the appropriate object.
+The client should use the returned notification without knowing its concrete implementation.
+
+Goal: Understand how to separate object creation from client code.
+*/
+
+interface Notification{
+    public void sendNotification(String message);
+}
+
+class EmailNotification implements Notification{
+    public void sendNotification(String message){
+        System.out.println("Email Notification sent"+ "\nMessage: " + message);
+    }
+}
+
+class SMSNotification implements Notification{
+    public void sendNotification(String message){
+        System.out.println("SMS Notification sent" + "\nMessage: " + message);
+    }
+}
+
+class PushNotification implements Notification{
+    public void sendNotification(String message){
+        System.out.println("Push Notification sent"+ "\nMessage: " + message);
+    }
+}
+
+class NotificationFactory{
+    public Notification getNotification(String type){
+        switch(type)
+        {
+            case "email":
+                return new EmailNotification();
+            case "sms":
+                return new SMSNotification();
+            case "push":
+                return new PushNotification();
+            default:
+                return null;
+        }
+    }
+}
+
+class PracticeMain{
+    public static void main (String[] args){
+        String type="email";
+        NotificationFactory notificationFactory=new NotificationFactory();
+        Notification notification=notificationFactory.getNotification(type);
+        notification.sendNotification("Hello");
+
+        type="push";
+        notification=notificationFactory.getNotification(type);
+        notification.sendNotification("Hello");
     }
 }

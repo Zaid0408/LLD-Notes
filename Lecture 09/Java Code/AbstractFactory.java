@@ -128,6 +128,18 @@ class KingBurger implements MealFactory {
     }
 }
 
+    //                 Client
+    //                   |
+    //                   ↓
+    //               UIFactory
+    //               /       \
+    //              /         \
+    //             ↓           ↓
+    //    WindowsFactory    MacFactory
+    //       /      \          /      \
+    //      ↓        ↓        ↓        ↓
+    //   Button  Checkbox  Button  Checkbox
+
 // --- Main Class ---
 public class AbstractFactory {
     public static void main(String[] args) {
@@ -141,5 +153,99 @@ public class AbstractFactory {
 
         if (burger != null) burger.prepare();
         if (garlicBread != null) garlicBread.prepare();
+
+        UIFactory factory = new WindowsFactory();
+
+        Button button = factory.createButton();
+        Checkbox checkbox = factory.createCheckbox();
+
+        button.render();
+        checkbox.render();
+    }
+}
+
+// Another example of Abstract factory pattern
+
+// Product interfaces
+interface Button {
+    void render();
+}
+
+interface Checkbox {
+    void render();
+}
+
+// Windows products:
+
+class WindowsButton implements Button {
+
+    @Override
+    public void render() {
+        System.out.println("Windows Button");
+    }
+}
+
+class WindowsCheckbox implements Checkbox {
+
+    @Override
+    public void render() {
+        System.out.println("Windows Checkbox");
+    }
+}
+
+// Mac products:
+
+class MacButton implements Button {
+
+    @Override
+    public void render() {
+        System.out.println("Mac Button");
+    }
+}
+
+class MacCheckbox implements Checkbox {
+
+    @Override
+    public void render() {
+        System.out.println("Mac Checkbox");
+    }
+}
+
+//Now the Abstract Factory:
+
+interface UIFactory {
+
+    Button createButton();
+
+    Checkbox createCheckbox();
+}
+
+// Windows factory:
+
+class WindowsFactory implements UIFactory {
+
+    @Override
+    public Button createButton() {
+        return new WindowsButton();
+    }
+
+    @Override
+    public Checkbox createCheckbox() {
+        return new WindowsCheckbox();
+    }
+}
+
+// Mac factory:
+
+class MacFactory implements UIFactory {
+
+    @Override
+    public Button createButton() {
+        return new MacButton();
+    }
+
+    @Override
+    public Checkbox createCheckbox() {
+        return new MacCheckbox();
     }
 }
