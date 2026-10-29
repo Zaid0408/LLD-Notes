@@ -168,6 +168,7 @@ abstract class ReportGenerator{
         Report report= createReport();
         report.generate();
     }
+    // Factory method 
     protected abstract Report createReport();
 }
 

@@ -128,6 +128,9 @@ class KingBurger implements MealFactory {
     }
 }
 
+    // Abstract Factory is not primarily about: "Which single object should I create?"
+    // It is about: "Which family of related objects should I create?" 
+    //  New Example: 
     //                 Client
     //                   |
     //                   ↓
@@ -154,10 +157,27 @@ public class AbstractFactory {
         if (burger != null) burger.prepare();
         if (garlicBread != null) garlicBread.prepare();
 
+        mealFactory= new KingBurger();
+
+        burger= mealFactory.createBurger(burgerType);
+        garlicBread= mealFactory.createGarlicBread(garlicBreadType);
+
+        if (burger != null) burger.prepare();
+        if (garlicBread != null) garlicBread.prepare();
+
+        // Example 2: 
         UIFactory factory = new WindowsFactory();
 
         Button button = factory.createButton();
         Checkbox checkbox = factory.createCheckbox();
+
+        button.render();
+        checkbox.render();
+
+        factory = new MacFactory();
+
+        button = factory.createButton();
+        checkbox = factory.createCheckbox();
 
         button.render();
         checkbox.render();
@@ -249,3 +269,4 @@ class MacFactory implements UIFactory {
         return new MacCheckbox();
     }
 }
+

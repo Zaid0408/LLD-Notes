@@ -52,7 +52,34 @@ class Channel implements IChannel {
         return "\nCheckout our new Video : " + latestVideo + "\n";
     }
 }
+/*
+OBSERVER PATTERN:
 
+Definition:
+A behavioural design pattern where a Subject maintains a list
+of Observers and notifies them whenever its state changes.
+
+Main components:
+
+1. Subject:
+   Maintains observers, allows subscription/unsubscription,
+   and notifies all observers.
+
+2. Observer:
+   Defines a common update() method.
+
+3. Concrete Subject:
+   Implements Subject and triggers notifications.
+
+4. Concrete Observer:
+   Implements Observer and defines its own reaction.
+
+Advantages:
+- Loose coupling
+- Dynamic subscription/unsubscription
+- Follows OCP
+- Multiple objects can react to one event
+*/
 // Concrete Observer: represents a subscriber to the channel
 class Subscriber implements ISubscriber {
     private String name;

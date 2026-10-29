@@ -54,7 +54,7 @@ public class SimpleFactory {
             burger.prepare();
         }
 
-        String type="email";
+        type="email";
         NotificationFactory notificationFactory=new NotificationFactory();
         Notification notification=notificationFactory.getNotification(type);
         notification.sendNotification("Hello");

@@ -92,10 +92,10 @@ class PercentageDiscount implements Discount{
     public long addDiscount(long amount) {
         if(amount<500)
         {
-            throw new ImplementationException("Cannot Apply Percentage Discount");
-            return 0;
+            throw new RuntimeException("Cannot Apply Percentage Discount");
+            // return 0;
         }
-        return amount-amount*0.1;
+        return (long)(amount-amount*0.1);
     }
 }
 
@@ -104,8 +104,8 @@ class FlatDiscount implements Discount{
     public long addDiscount(long amount) {
         if(amount<1000)
         {
-            throw new ImplementationException("Cannot Apply Flat Discount");
-            return 0;
+            throw new RuntimeException("Cannot Apply Flat Discount");
+            // return 0;
         }
         return amount-500;
     }
@@ -130,7 +130,7 @@ class UPIPayment implements PaymentMethod{
     public boolean makePayment(long amount) {
         System.out.println("Payment of Rs" + amount + " made using UPI");
         System.out.println("Payment Successful");
-        return 
+        return true;
     }
 }
 
@@ -180,7 +180,7 @@ public class Ecommerce {
         long amount = order.calculateOrderAmount();
 
         // 3. Apply discount
-        long finalAmount = discount.applyDiscount(amount);
+        long finalAmount = discount.addDiscount(amount);
 
         System.out.println("Original Amount: Rs " + amount);
         System.out.println("Final Amount: Rs " + finalAmount);
