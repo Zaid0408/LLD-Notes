@@ -93,10 +93,21 @@ Implement the complete solution and share your Java code for review.
 */
 import java.time.Instant;
 import java.util.*;
+
+import javax.management.Notification;
 public class NoficationNewSystem {
-    
+    static List<Recipient> recipients = new ArrayList<>();
+
+    public static void main(String[] args) {
+        // Entry point for the notification engine.
+    }
+}
+class Recipient{
+    String name,email,phone,pushToken;
+    long id;
 }
 
+List<Recipient> recipients=new ArrayList<>();
 enum Status{
     CREATED,PENDING,SENT,FAILED;
 }
@@ -105,10 +116,117 @@ enum DeliveryChannel{
 }
 class Notification{
     long id;
+    long recipientId;
     Status status;
     DeliveryChannel channel;
     String message;
     Instant createdAt;
+    Notification(long id,Status st,String message, long recipientId)
+    {
+        this.id=id;this.status=st;this.message=message;
+        this.recipientId=recipientId;
+        this.createdAt=Instant.now();
+    }
+}
+
+interface Enhancement{
+    Notification getNotification();
+}
+class NotificationLog implements Enhancement{
+    public Notification getNotification()
+    {
+        return new Notification(0, null, null, 0);
+    }
+}
+
+// Strategy for email,sms and =push
+
+interface DeliveryStrategy {
+    boolean sendNotification(Notification notification);
+}
+
+class EmailNotification implements DeliveryStrategy{
+    @Override 
+    public boolean sendNotification(Notification notification)
+    {
+        long recipientId=notification.recipientId;
+        if(recipientId==-1)
+        {
+            throw new RuntimeException("Recipient not found");
+        }
+            
+        if(notification.message==null || notification.message.isEmpty())
+        {
+            throw new RuntimeException("Message is empty");
+        }
+        if(notification.status==Status.SENT || notification.status==Status.FAILED)
+        {
+            throw new RuntimeException("Notification already sent");
+        }
+        Recipient recipient= NoficationNewSystem.recipients.stream().filter(r->r.id==recipientId).findFirst().orElse(null);
+        if(recipient==null)
+            throw new RuntimeException("Recipient not found");
+        if(recipient.email==null || recipient.email.isEmpty())
+            throw new RuntimeException("Recipient email not found");
+        System.out.println("Sending Email to "+recipient.email+" with message: "+notification.message);
+        return true;
+    }
+}
+
+class SMSNotification implements DeliveryStrategy{
+    @Override 
+    public boolean sendNotification(Notification notification)
+    {
+        long recipientId=notification.recipientId;
+        if(recipientId==-1)
+        {
+            throw new RuntimeException("Recipient not found");
+        }
+            
+        if(notification.message==null || notification.message.isEmpty())
+        {
+            throw new RuntimeException("Message is empty");
+        }
+        if(notification.status==Status.SENT || notification.status==Status.FAILED)
+        {
+            throw new RuntimeException("Notification already sent");
+        }
+        Recipient recipient= NoficationNewSystem.recipients.stream().filter(r->r.id==recipientId).findFirst().orElse(null);
+        if(recipient==null)
+            throw new RuntimeException("Recipient not found");
+        if(recipient.phone==null || recipient.phone.isEmpty())
+            throw new RuntimeException("Recipient phone not found");
+        System.out.println("Sending SMS to "+recipient.phone+" with message: "+notification.message);
+        return true;
+    }
+}
+
+class PushNotification implements DeliveryStrategy{
+    @Override 
+    public boolean sendNotification(Notification notification)
+    {
+        long recipientId=notification.recipientId;
+        if(recipientId==-1)
+        {
+            throw new RuntimeException("Recipient not found");
+        }
+            
+        if(notification.message==null || notification.message.isEmpty())
+        {
+            throw new RuntimeException("Message is empty");
+        }
+        if(notification.status==Status.SENT || notification.status==Status.FAILED)
+        {
+            throw new RuntimeException("Notification already sent");
+        }
+        Recipient recipient= NoficationNewSystem.recipients.stream().filter(r->r.id==recipientId).findFirst().orElse(null);
+        if(recipient==null)
+            throw new RuntimeException("Recipient not found");
+        if(recipient.pushToken==null || recipient.pushToken.isEmpty())
+            throw new RuntimeException("Recipient push token not found");
+        System.out.println("Sending Push Notification to "+recipient.pushToken+" with message: "+notification.message);
+        return true;
+    }
 }
 
 
