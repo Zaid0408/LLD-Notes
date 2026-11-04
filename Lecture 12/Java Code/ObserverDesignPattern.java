@@ -101,18 +101,21 @@ public class ObserverDesignPattern {
         // Create a channel and subscribers
         Channel channel = new Channel("CoderArmy");
 
-        Subscriber subs1 = new Subscriber("Varun", channel);
+        Subscriber subs1 = new Subscriber("Varun", channel);        
         Subscriber subs2 = new Subscriber("Tarun", channel);
 
         // Varun and Tarun subscribe to CoderArmy
         channel.subscribe(subs1);
+        System.out.println("Adding subscriber: Varun");
         channel.subscribe(subs2);
+        System.out.println("Adding subscriber: Tarun");
 
         // Upload a video: both Varun and Tarun are notified
         channel.uploadVideo("Observer Pattern Tutorial");
 
         // Varun unsubscribes; Tarun remains subscribed
         channel.unsubscribe(subs1);
+        System.out.println("Removing subscriber: Varun");
 
         // Upload another video: only Tarun is notified
         channel.uploadVideo("Decorator Pattern Tutorial");

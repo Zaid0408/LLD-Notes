@@ -90,11 +90,11 @@ class DeliveryService{
         this.deliveryStrategy = deliveryStrategy;
     }
     public int calculateDeliveryCharge(int distance) {
-        return strategy.calculateCharge(distance);
+        return (int)deliveryStrategy.calculateDeliveryCharges(distance);
     }
 
     public void setStrategy(DeliveryStrategy strategy) {
-        this.strategy = strategy; // changing the strategy to be used by the client
+        this.deliveryStrategy = strategy; // changing the strategy to be used by the client
     }
 }
 
