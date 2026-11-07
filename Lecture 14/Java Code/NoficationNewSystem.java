@@ -60,6 +60,8 @@ It should be able to:
 4. Send the notification.
 5. Update its status.
 6. Trigger the appropriate notification events.
+
+
 6. Extensibility
 The design should allow future additions such as:
 - WhatsApp notifications.
@@ -94,20 +96,49 @@ Implement the complete solution and share your Java code for review.
 import java.time.Instant;
 import java.util.*;
 
-import javax.management.Notification;
 public class NoficationNewSystem {
-    static List<Recipient> recipients = new ArrayList<>();
+    int k=0;
 
     public static void main(String[] args) {
         // Entry point for the notification engine.
     }
 }
+
+class NotificationStore {
+    private static final NotificationStore INSTANCE = new NotificationStore();
+
+    private final Map<Long, Recipient> recipients = new HashMap<>();
+    private final Map<Long, Notification> notifications = new HashMap<>();
+
+    private NotificationStore() {
+    }
+
+    public static NotificationStore getInstance() {
+        return INSTANCE;
+    }
+
+    public void addRecipient(Recipient recipient) {
+        recipients.put(recipient.id, recipient);
+    }
+
+    public Optional<Recipient> findRecipient(long id) {
+        return Optional.ofNullable(recipients.get(id));
+    }
+
+    public void addNotification(Notification notification) {
+        notifications.put(notification.id, notification);
+    }
+
+    public Optional<Notification> findNotification(long id) {
+        return Optional.ofNullable(notifications.get(id));
+    }
+}
+
 class Recipient{
     String name,email,phone,pushToken;
     long id;
 }
 
-List<Recipient> recipients=new ArrayList<>();
 enum Status{
     CREATED,PENDING,SENT,FAILED;
 }
@@ -129,17 +160,72 @@ class Notification{
     }
 }
 
+// Decorator pattern for notification enhancements
 interface Enhancement{
-    Notification getNotification();
+    String getNotification(long notificationId);
 }
 class NotificationLog implements Enhancement{
-    public Notification getNotification()
+    public String getNotification(long notificationId)
     {
-        return new Notification(0, null, null, 0);
+        Notification notification=NotificationStore.getInstance()
+            .findNotification(notificationId).orElse(null);
+        if(notification==null)
+            throw new RuntimeException("Notification not found");
+        return "Notification ID: "+notification.id+" Status: "+notification.status+" Message: "+notification.message+" Recipient ID: "+notification.recipientId+" Created At: "+notification.createdAt;
     }
 }
 
-// Strategy for email,sms and =push
+abstract class NotificationDecorator implements Enhancement{
+    protected Enhancement enhancement;
+    public NotificationDecorator(Enhancement enhancement)
+    {
+        this.enhancement=enhancement;
+    }
+}
+
+class RetryMechanism extends NotificationDecorator{
+    public RetryMechanism(Enhancement enhancement)
+    {
+        super(enhancement);
+    }
+    public String getNotification(long notificationId)
+    {
+        String log=enhancement.getNotification(notificationId);
+        Notification notification=NotificationStore.getInstance()
+            .findNotification(notificationId).orElse(null);
+        if(notification==null)
+            throw new RuntimeException("Notification not found");
+        if(notification.status==Status.FAILED)
+        {
+            System.out.println("Retrying notification ID: "+notification.id);
+            // Simulate retry logic
+            notification.status=Status.PENDING;
+            log+="\nRetrying notification. New Status: "+notification.status;
+        }
+        return log;
+    }
+}
+
+class HighPriorityNotification extends NotificationDecorator{
+    public HighPriorityNotification(Enhancement enhancement)
+    {
+        super(enhancement);
+    }
+    public String getNotification(long notificationId)
+    {
+        String log=enhancement.getNotification(notificationId);
+        Notification notification=NotificationStore.getInstance()
+            .findNotification(notificationId).orElse(null);
+        if(notification==null)
+            throw new RuntimeException("Notification not found");
+        System.out.println("High priority notification ID: "+notification.id);
+        log+="\nHigh priority notification.";
+        return log;
+    }
+}
+
+
+// Strategy for email,sms and push
 
 interface DeliveryStrategy {
     boolean sendNotification(Notification notification);
@@ -163,7 +249,8 @@ class EmailNotification implements DeliveryStrategy{
         {
             throw new RuntimeException("Notification already sent");
         }
-        Recipient recipient= NoficationNewSystem.recipients.stream().filter(r->r.id==recipientId).findFirst().orElse(null);
+        Recipient recipient=NotificationStore.getInstance()
+            .findRecipient(recipientId).orElse(null);
         if(recipient==null)
             throw new RuntimeException("Recipient not found");
         if(recipient.email==null || recipient.email.isEmpty())
@@ -191,7 +278,8 @@ class SMSNotification implements DeliveryStrategy{
         {
             throw new RuntimeException("Notification already sent");
         }
-        Recipient recipient= NoficationNewSystem.recipients.stream().filter(r->r.id==recipientId).findFirst().orElse(null);
+        Recipient recipient=NotificationStore.getInstance()
+            .findRecipient(recipientId).orElse(null);
         if(recipient==null)
             throw new RuntimeException("Recipient not found");
         if(recipient.phone==null || recipient.phone.isEmpty())
@@ -219,7 +307,8 @@ class PushNotification implements DeliveryStrategy{
         {
             throw new RuntimeException("Notification already sent");
         }
-        Recipient recipient= NoficationNewSystem.recipients.stream().filter(r->r.id==recipientId).findFirst().orElse(null);
+        Recipient recipient=NotificationStore.getInstance()
+            .findRecipient(recipientId).orElse(null);
         if(recipient==null)
             throw new RuntimeException("Recipient not found");
         if(recipient.pushToken==null || recipient.pushToken.isEmpty())
@@ -229,4 +318,82 @@ class PushNotification implements DeliveryStrategy{
     }
 }
 
+// Observer pattern for notification events
+
+interface NotificationPusher{
+    void pushNotification(Notification notification);
+    void notifyListeners(Notification notification, String event);
+}
+
+interface NotificationListener{
+    void onNotificationEvent(Notification notification, String event);
+}
+
+class NotificationPush implements NotificationPusher{
+    EmailNotification emailNotification;
+    SMSNotification smsNotification;
+    PushNotification pushNotification;
+    List<NotificationListener> listeners;
+    public NotificationPush(){
+        emailNotification=new EmailNotification();
+        smsNotification=new SMSNotification();
+        pushNotification=new PushNotification();
+        listeners=new ArrayList<>();
+    }
+
+    public void pushNotification(Notification notification)
+    {
+        boolean sent=false;
+        try{
+            switch(notification.channel)
+            {
+                case EMAIL:
+                    sent=emailNotification.sendNotification(notification);
+                    break;
+                case SMS:
+                    sent=smsNotification.sendNotification(notification);
+                    break;
+                case PUSH:
+                    sent=pushNotification.sendNotification(notification);
+                    break;
+            }
+            if(sent)
+            {
+                notification.status=Status.SENT;
+                notifyListeners(notification,"SENT");
+            }
+        }
+        catch(Exception e)
+        {
+            notification.status=Status.FAILED;
+            notifyListeners(notification,"FAILED");
+        }
+    }
+
+    public void notifyListeners(Notification notification, String event)
+    {
+        for(NotificationListener listener:listeners)
+        {
+            listener.onNotificationEvent(notification,event);
+        }
+    }
+}
+
+class NotificationLogger implements NotificationListener{
+    public void onNotificationEvent(Notification notification, String event){
+        System.out.println("Notification Event: " + event + " for notification: " + notification.message);
+    }
+}
+
+class NotificationAnalytics implements NotificationListener{
+    public void onNotificationEvent(Notification notification, String event){
+        System.out.println("Analytics: Notification Event: " + event + " for notification: " + notification.message);
+    }
+}
+
+class NotificationAudit implements NotificationListener{
+    public void onNotificationEvent(Notification notification, String event){
+        System.out.println("Audit: Notification Event: " + event + " for notification: " + notification.message);
+    }
+}
 
