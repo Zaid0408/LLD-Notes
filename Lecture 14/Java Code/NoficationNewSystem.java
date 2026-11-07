@@ -95,14 +95,49 @@ Implement the complete solution and share your Java code for review.
 */
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class NoficationNewSystem {
 
+    /*
+                    CLIENT
+                     |
+                     v
+              NotificationPush
+                     |
+          +----------+----------+
+          |                     |
+          v                     v
+       STRATEGY              OBSERVER
+          |                     |
+    +-----+-----+          +----+-----+
+    |     |     |          |    |     |
+  Email  SMS  Push       Logger Analytics Audit
+    |
+    v
+  DECORATOR
+    |
+    +---- RetryDecorator
+    |
+    +---- PriorityDecorator
+
+       SINGLETON
+           |
+           v
+     NotificationStore
+      /            \
+ Recipients    Notifications
+    
+    */
+
     public static void main(String[] args) {
 
         // 1. Get Singleton NotificationStore
+        /*
+         * STEP 1: SINGLETON
+         * Get the single shared NotificationStore instance.
+         * Register recipients and store notifications here.
+         */
         NotificationStore store = NotificationStore.getInstance();
 
         // 2. Create and register recipient
@@ -117,6 +152,16 @@ public class NoficationNewSystem {
         store.addRecipient(recipient);
 
         // 3. Configure Strategies
+                /*
+         * STEP 3: STRATEGY
+         * Register all available notification delivery strategies.
+         *
+         * Email, SMS and Push implement the same interface.
+         * We select the appropriate strategy using DeliveryChannel.
+         *
+         * Adding a new delivery channel only requires registering
+         * another implementation here.
+         */
         Map<DeliveryChannel, DeliveryStrategy> strategies =
                 new EnumMap<>(DeliveryChannel.class);
 
@@ -125,23 +170,64 @@ public class NoficationNewSystem {
         strategies.put(DeliveryChannel.PUSH, new PushNotification());
 
         // 4. Create Notification Service
+                /*
+         * STEP 4: NOTIFICATION SERVICE
+         * Create the service responsible for coordinating delivery.
+         * It receives the available strategies.
+         */
         NotificationPush service = new NotificationPush(strategies);
 
         // 5. Register Observers
+                /*
+         * STEP 5: OBSERVER
+         * Register different listeners interested in notification events.
+         *
+         * Logger    -> Logs notification events.
+         * Analytics -> Tracks notification activity.
+         * Audit     -> Maintains an audit record.
+         *
+         * Whenever an event occurs, all registered listeners are notified.
+         */
         service.addListener(new NotificationLogger());
         service.addListener(new NotificationAnalytics());
         service.addListener(new NotificationAudit());
 
         // 6. Create Email Notification
+                /*
+         * STEP 6: CREATE NOTIFICATION
+         * Create an email notification for Alice.
+         *
+         * retryEnabled = true
+         * highPriority = true
+         *
+         * Store the notification in our Singleton NotificationStore.
+         */
         Notification email = new Notification(
             101L, 1L, "Welcome to our application!",
             DeliveryChannel.EMAIL, true, true
         );
 
         store.addNotification(email);
+                /*
+         * STEP 7: DECORATOR + STRATEGY
+         * Send the notification.
+         *
+         * The service selects EmailNotification as the strategy.
+         * RetryDecorator and PriorityDecorator are applied
+         * based on the notification's configuration.
+         *
+         * The decorators wrap the original delivery strategy
+         * and add extra behaviour without modifying EmailNotification.
+         */
         service.pushNotification(email);
 
         System.out.println("\n-------------------------\n");
+
+        /*
+         * STEP 8: REPEAT FOR OTHER CHANNELS
+         * The same service can send SMS and Push notifications.
+         * We don't need separate services for each channel.
+         */
 
         // 7. Create SMS Notification
         Notification sms = new Notification(
