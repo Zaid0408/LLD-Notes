@@ -13,7 +13,10 @@ Important: This is thread-safe without explicitly using synchronized.
 */
 
 public class ThreadSafeEagerSingleton {
+    // diff between single and thread safe is here:
     private static ThreadSafeEagerSingleton instance = new ThreadSafeEagerSingleton();
+    // new ThreadSafeEagerSingleton(); is done here but in simple singleton it is done in getInstance() method, 
+    // so here it is thread safe because it is created at the time of class loading and in simple singleton it is created at the time of calling getInstance() method which can be called by multiple threads at the same time and hence not thread safe.
     // object is created as soon as the JVM initializes the class, regardless of whether anyone has called getInstance().
     private ThreadSafeEagerSingleton() {
         System.out.println("Singleton Constructor Called!");

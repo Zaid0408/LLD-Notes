@@ -49,7 +49,9 @@ public class ThreadSafeLockingSingleton {
     private ThreadSafeLockingSingleton() {
         System.out.println("Singleton Constructor Called!");
     }
-
+    // extension of simple singleton to make it thread safe by using synchronized block
+    // but this is not the best way to do it because every time we call getInstance() method we are acquiring the lock which is not necessary after the instance is created.
+    // so we will use double checked locking to avoid this overhead of acquiring the lock every time we call getInstance()
     public static ThreadSafeLockingSingleton getInstance() {
         synchronized (ThreadSafeLockingSingleton.class) { // Lock for thread safety
             if (instance == null) {

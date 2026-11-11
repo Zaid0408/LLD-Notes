@@ -43,7 +43,7 @@ So your implementation works in a single-threaded environment but does not guara
 
 public class SimpleSingleton {
     private static SimpleSingleton instance = null;
-
+    // Static variable to hold the single instance of the class , important here 
     private SimpleSingleton() {
         System.out.println("Singleton Constructor called");
     }
@@ -62,3 +62,13 @@ public class SimpleSingleton {
         System.out.println(s1 == s2);
     }
 }
+
+/*
+ USE of static SimpleSingleton instance and static getInstance() method to ensure that 
+ only one instance of the class is created and shared across the application.
+
+ static variables and methods belong to the class itself rather than any specific instance,
+so they can be accessed without creating an object of the class. 
+hence SimpleSingleton instance= null does not run in a infinite loop because it is only initialized once when the class is loaded, 
+and subsequent calls to getInstance() will return the same instance without creating a new one.
+*/
