@@ -116,6 +116,15 @@ class RemoteController {
     }
 }
 
+/*
+You don't need to change the internal execution logic of RemoteController.
+
+This gives us:
+- Loose coupling: Invoker doesn't depend on concrete devices.
+- OCP: New commands can be added without modifying the Invoker.
+- Undo/Redo: Operations can be stored and reversed.
+- Flexibility: Commands can be queued, logged or executed later.
+*/
 // ----------------------------
 // Main Application
 // ----------------------------
