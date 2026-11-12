@@ -11,6 +11,8 @@ public class HttpRequest {
     private int timeout; // in seconds
 
     // Private constructor - can only be accessed by the Builder
+        // You want object creation to happen through your Builder. 
+    // This gives the Builder control over how the object is constructed.
     private HttpRequest() {
         headers = new HashMap<>();
         queryParams = new HashMap<>();
@@ -42,6 +44,9 @@ public class HttpRequest {
     }
 
     // Nested Step interfaces
+    // Why so many interfaces?
+    // Because you are implementing a Step Builder.
+    // The idea is to enforce the order in which the user constructs the object.
     interface UrlStep {
         MethodStep withUrl(String url);
     }
@@ -61,6 +66,8 @@ public class HttpRequest {
     }
 
     // Concrete step builder as static nested class
+    // This is the actual Builder implementation. It implements all four interfaces and maintains a reference to the object being constructed.
+    // Why static? Because it doesn't need to access any instance members of the outer class. It only needs to construct an instance of HttpRequest.
     static class HttpRequestStepBuilder implements UrlStep, MethodStep, HeaderStep, OptionalStep {
         private HttpRequest req;
 
@@ -69,10 +76,18 @@ public class HttpRequest {
         }
 
         // UrlStep implementation
+        /*
+        What is happening?
+        1. The URL is assigned to the actual HttpRequest object.
+        2. this returns the current Builder object.
+        3. But the return type is MethodStep, so the caller can now access only methods exposed by that interface.
+        */
         public MethodStep withUrl(String url) {
             req.url = url;
             return this;
         }
+        // The Builder is modifying the same HttpRequest object throughout the entire construction process.
+        // It doesn't create a new HttpRequest at every step.
 
         // MethodStep implementation
         public HeaderStep withMethod(String method) {
@@ -97,6 +112,10 @@ public class HttpRequest {
             return this;
         }
 
+        // Build method to create the immutable HttpRequest object
+        // This is where the final object is returned.
+        // Why have a build() method?
+        // Because before returning the object, we can perform validations.
         public HttpRequest build() {
             if (req.url == null || req.url.isEmpty()) {
                 throw new RuntimeException("URL cannot be empty");

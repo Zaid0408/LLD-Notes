@@ -68,11 +68,20 @@ class FanCommand implements Command {
 // ----------------------------
 // Invoker: Remote Controller with static array of 4 buttons
 // ----------------------------
+
+/*
+Your RemoteController is the Invoker.
+private Command[] buttons;
+It stores Command objects instead of directly storing references to Light, Fan, etc.
+
+When someone presses a button: buttons[idx].execute();
+The remote doesn't need to know whether it's controlling a light or fan. It simply executes the assigned command.
+*/
 class RemoteController {
     private static final int numButtons = 4;
-    private Command[] buttons;
+    private Command[] buttons; // store Number of buttons and their assigned commands
     private boolean[] buttonPressed;
-
+    // track the state of each button (on/off) this will help us identify if the button is pressed or not and we can toggle the state of the button when it is pressed again.
     public RemoteController() {
         buttons = new Command[numButtons];
         buttonPressed = new boolean[numButtons];
@@ -89,14 +98,18 @@ class RemoteController {
         }
     }
 
+    /*
+    idx: the button index (0 to 3)  When a button is pressed, we check if it has an assigned command.
+    If it does, we check the current state of the button (on/off).
+    */
     public void pressButton(int idx) {
-        if (idx >= 0 && idx < numButtons && buttons[idx] != null) {
-            if (!buttonPressed[idx]) {
+        if (idx >= 0 && idx < numButtons && buttons[idx] != null) { //validate the idx and check if the button has an assigned command
+            if (!buttonPressed[idx]) { // if button is not pressed, execute the command
                 buttons[idx].execute();
             } else {
-                buttons[idx].undo();
+                buttons[idx].undo(); // if button is already pressed, undo the command
             }
-            buttonPressed[idx] = !buttonPressed[idx];
+            buttonPressed[idx] = !buttonPressed[idx]; // toggle the state of the button
         } else {
             System.out.println("No command assigned at button " + idx);
         }
@@ -115,6 +128,7 @@ public class CommandPattern {
 
         remote.setCommand(0, new LightCommand(livingRoomLight));
         remote.setCommand(1, new FanCommand(ceilingFan));
+        // Buttons array is set up with LightCommand at index 0 and FanCommand at index 1. The other two buttons remain unassigned.
 
         // Simulate button presses (toggle behavior)
         System.out.println("--- Toggling Light Button 0 ---");

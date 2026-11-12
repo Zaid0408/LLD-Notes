@@ -11,6 +11,8 @@ public class HttpRequest {
     private int timeout; // in seconds
 
     // Private constructor - can only be accessed by the Builder
+    // You want object creation to happen through your Builder. 
+    // This gives the Builder control over how the object is constructed.
     HttpRequest() {
         headers = new HashMap<>();
         queryParams = new HashMap<>();

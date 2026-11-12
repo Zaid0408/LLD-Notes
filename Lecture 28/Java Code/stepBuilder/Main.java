@@ -10,6 +10,14 @@ public class Main {
             .withTimeout(45)
             .build();
 
+        /*
+        Notice that you cannot call: builder.withMethod("POST"); before providing the URL.
+        Why?
+        Because getBuilder() returns UrlStep, and UrlStep only exposes withUrl().
+        After calling withUrl(), it returns MethodStep.
+
+        This is enforced by Java's type system at compile time!That's the main advantage of Step Builder.
+        */
         stepRequest.execute();
     }
 }
