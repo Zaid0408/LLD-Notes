@@ -134,15 +134,19 @@ public class CompositePattern {
         Folder images = new Folder("images");
         images.add(new File("photo.jpg", 1));
         root.add(images);
-
+        System.out.println("Listing root contents:");
         root.ls(0);
 
+        System.out.println("\nListing docs contents:");
         docs.ls(0);
+
+        System.out.println("\nOpening all contents of root:");
 
         root.openAll(0);
 
         FileSystemItem cwd = root.cd("docs");
         if (cwd != null) {
+            System.out.println("\nChanged directory to docs. Listing contents:");
             cwd.ls(0);
         } else {
             System.out.println("\nCould not cd into docs\n");

@@ -23,12 +23,12 @@ class XmlDataProvider {
 
 // 3. Adapter: implements IReports by converting XML → JSON
 class XmlDataProviderAdapter implements IReports {
-    private XmlDataProvider xmlProvider;
+    private XmlDataProvider xmlProvider; // 'has a' reference to the adaptee
     public XmlDataProviderAdapter(XmlDataProvider provider) {
         this.xmlProvider = provider;
     }
 
-    public String getJsonData(String data) {
+    public String getJsonData(String data) { // implements the target interface method
         // 1. Get XML from the adaptee
         String xml = xmlProvider.getXmlData(data);
 
@@ -53,6 +53,10 @@ class Client {
             + report.getJsonData(rawData));
     }
 }
+
+// Flow of control:
+// client.getReport(adapter, rawData) -> adapter.getJsonData(rawData) -> xmlProvider.getXmlData(rawData) get data from XML 
+// -> adapter.getJsonData(rawData) adapter will get the xml data and then convert to json -> client.getReport(adapter, rawData)
 
 public class AdapterPattern {
     public static void main(String[] args) {
