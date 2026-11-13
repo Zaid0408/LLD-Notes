@@ -11,6 +11,8 @@ abstract class ModelTrainer {
         saveModel();       // subclass-specific or default
     }
 
+    // Common concrete methods
+
     protected void loadData(String path) {
         System.out.println("[Common] Loading dataset from " + path);
         // e.g., read CSV, images, etc.
@@ -20,9 +22,11 @@ abstract class ModelTrainer {
         System.out.println("[Common] Splitting into train/test and normalizing");
     }
 
+    // Abstract methods to be implemented by subclasses
     protected abstract void trainModel();
     protected abstract void evaluateModel();
 
+    // Optional hook method with default implementation
     // Provide a default save, but subclasses can override if needed
     protected void saveModel() {
         System.out.println("[Common] Saving model to disk as default format");
@@ -32,6 +36,17 @@ abstract class ModelTrainer {
 // ───────────────────────────────────────────────────────────
 // 2. Concrete subclass: Neural Network
 // ───────────────────────────────────────────────────────────
+/*
+NeuralNetworkTrainer overrides three methods:
+- trainModel()
+- evaluateModel()
+- saveModel()
+But notice that it doesn't override:
+loadData();
+preprocessData();
+
+It simply uses the parent's implementation.
+*/
 class NeuralNetworkTrainer extends ModelTrainer {
     @Override
     protected void trainModel() {
