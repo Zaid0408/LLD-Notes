@@ -39,7 +39,12 @@ class ThousandHandler extends MoneyHandler {
             else {
                 System.out.println("Remaining amount of " + remainingAmount + " cannot be fulfilled (Insufficinet fund in ATM)");
             }
+
+            // nextHandler was initialized by client in the main method by setNextHandler() method. 
+            // That is why the ThousandHandler can call nextHandler.dispense(remainingAmount) to pass the remaining amount to the next handler in the chain which is FiveHundredHandler.
+            // If nextHandler is null, it means there are no more handlers in the chain to process the remaining amount. In that case, we print a message indicating that the remaining amount cannot be fulfilled due to insufficient funds in the ATM.
         }
+        System.out.println("Full amount dispensed. Remaining amount: " + remainingAmount);
     }
 }
 
