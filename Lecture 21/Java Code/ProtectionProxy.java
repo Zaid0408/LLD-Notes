@@ -1,7 +1,9 @@
+// Subject Interface
 interface IDocumentReader {
     void unlockPDF(String filePath, String password);
 }
 
+// Real Subject: Observe that both this and proxy implement the same interface.
 class RealDocumentReader implements IDocumentReader {
     @Override
     public void unlockPDF(String filePath, String password) {
