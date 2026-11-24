@@ -1,6 +1,9 @@
 import java.util.*;
 public class MusicPlayerPrac {
     long songId=0,playListId=0;
+    enum PlaybackStatus{
+        PLAYING,PAUSED,STOPPED;
+    }
     // Entities
     class Song{
         long id;
