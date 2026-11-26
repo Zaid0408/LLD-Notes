@@ -8,14 +8,16 @@ public class MusicPlayerPrac {
     class Song{
         long id;
         String title,artist,albumName,duration,info;
-
+        boolean downloaded;
+        PlaybackStatus playbackStatus;
         public Song(String title,String artist,String albumName,String duration,String info)
         {
             this.id=songId++;
-            this.title=title;this.artist=artist;
+            this.title=title;this.artist=artist;this.downloaded=false;
             this.albumName=albumName;this.duration=duration;this.info=info;
         }
         long getId(){ return this.id;}
+        boolean isDownloaded() { return  this.downloaded;}
     }
 
     class PlayList{
@@ -76,65 +78,105 @@ public class MusicPlayerPrac {
 
     class MusicPlayer{
         private PlaybackController playbackController;
-        private List<Song> queue;
+        private List<Song> songList;
         private Song currentSong;
-        private boolean isPaused;
         private int currIndex;
+        private PlaybackStatus playbackStatus;
+        private boolean isOnline;
+        private PlaybackStrategyFactory playbackStrategyFactory;
 
         public MusicPlayer(Song currentSong)
         {
-            this.currentSong=currentSong; this.isPaused=false;this.currIndex=0;
-            this.queue=new ArrayList<>();// faster then LinkedList
-            this.playbackController=new PlaybackController(new Play(), new Pause());
-        }
-        boolean isPaused() {
-            return isPaused;
+            this.currentSong=currentSong;this.currIndex=0;this.isOnline=true;
+            this.songList=new ArrayList<>();
+            this.playbackStrategyFactory = new PlaybackStrategyFactory();
+            this.playbackController=new PlaybackController(new Play(playbackStrategyFactory,isOnline), new Pause());
         }
         String getSongTitle()
         {
             return currentSong.title;
         }
+        PlaybackStatus getStatus() { return this.playbackStatus;}
+        void setStatus(PlaybackStatus pl) { this.playbackStatus=pl;}
         void playSong()
         {
+            if(playbackStatus==PlaybackStatus.PLAYING)
+            {
+                System.out.println("Song is already playing , Continuing..,");
+                return;
+            }
+            setStatus(PlaybackStatus.PLAYING);
             playbackController.playSong(currentSong);
         }
         void pauseSong()
         {
-            if(isPaused)
+            if(playbackStatus==PlaybackStatus.PAUSED)
             {
                 System.out.println("Song is already paused , Cannot pause..");
                 return;
             }
+            setStatus(PlaybackStatus.PAUSED);
             playbackController.pauseSong(currentSong);
         }
         void removeSong(Song song, Optional<Integer> idx) // same method can be used to remove a song to the end or at a particular idx
         {
             if (idx.isPresent()){
-                queue.remove((int) idx.get());
+                songList.remove((int) idx.get());
                 if((int)idx.get() < currIndex)
                     currIndex--;
             }
             else
-                queue.remove(song);
+                songList.remove(song);
         }
         void addSong(Song song, Optional<Integer> idx) // same method can be used to add a song to the end or at a particular idx
         {
             if (idx.isPresent()){
-                queue.add((int) idx.get(),song);
+                songList.add((int) idx.get(),song);
                 if((int)idx.get() < currIndex)
                     currIndex++;
             }
             else
-                queue.add(song);
+                songList.add(song);
         }
         void listSongs()
         {
             System.out.println("The songs in this Music Player are: ");
-            for(Song song: queue)
+            for(Song song: songList)
             {
                 System.out.println("Song Name: "+ song.title+ " Artist: "+ song.artist+ "Album: "+ song.albumName+ "Duration: "+ song.duration);
             }
 
+        }
+        void next()
+        {
+            if(songList.size()==0)
+            {
+                System.out.println("No songs in list!");
+                return;
+            }
+            if(currIndex+1==songList.size())
+            {
+                System.out.println("End of the List No more songs. Please add new song to the playlist to listen to new songs...");
+            }
+
+            currIndex++;
+            currentSong=songList.get(currIndex);
+            playSong();
+        }
+        void previous()
+        {
+            if(songList.size()==0)
+            {
+                System.out.println("No songs in list!");
+                return;
+            }
+            if(currIndex-1==-1)
+            {
+                System.out.println("End of the List No more songs. Please add new song to the playlist to listen to new songs...");
+            }
+            currIndex--;
+            currentSong=songList.get(currIndex);
+            playSong();
         }
     }
 
@@ -160,32 +202,37 @@ public class MusicPlayerPrac {
     }
 
     class PlaybackStrategyFactory{
-        private PlaybackStrategy playbackStrategy;
-
-        public PlaybackStrategyFactory(PlaybackStrategy p)
+        public PlaybackStrategy getStrategy(Song song, boolean isOnline) // to override the strategy if we need to change to offline and online
         {
-            this.playbackStrategy=p;
-        }
-        public void setStrategy(PlaybackStrategy p) // to override the strategy if we need to change to offline and online
-        {
-            this.playbackStrategy=p;
-        }
-
-        public void play(Song song) // the appropriate strategy will play the song 
-        {
-            playbackStrategy.play(song);
+            if(isOnline)
+            {
+                return new StreamingPlayBack();
+            }
+            else if(song.isDownloaded())
+            {
+                return new OfflinePlayBack();
+            }
+            throw new IllegalStateException("Song is not downloaded and device is offline: " + song.title);
         }
 
     }
     
 
     // command pattern for Pause , Play 
-    class Play{
-        void execute(Song son)
-        {
-            System.out.println("Playing song ...");
-            System.out.println("Song Name: "+ son.title+ " Artist: "+ son.artist+ " Duration: "+ son.duration);
+    class Play{ // this is a recievr for the play command. But at the same time is a clinet for the strategy pattern
+        private PlaybackStrategyFactory factory;
+        private boolean isOnline;
+        // PlaybackStrategyFactory decides the which Strategy to be followed while streaming , online or offline 
+        // Please check all the classes to get to know the ful picture , Strategy is used in the Play command reciever only . 
+        public Play(PlaybackStrategyFactory factory, boolean isOnline) {
+            this.factory = factory;
+            this.isOnline = isOnline;
         }
+        void execute(Song song) {
+            System.out.println("Playing song ...");
+            PlaybackStrategy strategy =factory.getStrategy(song, isOnline);
+            strategy.play(song);
+        }   
     }
 
     class Pause{
@@ -245,9 +292,6 @@ public class MusicPlayerPrac {
         }
     }
 
-    class Next{
-        
-    }
 
     public static void main(String[] args)
     {
